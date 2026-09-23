@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Build Manage • Հյուրի Մուտք</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background: #0B1120;
+      color: #F8FAFC;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      background: #1E293B;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 32px 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(16, 185, 129, 0.08);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 20px;
+      color: #10B981;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #FFFFFF;
+      margin-bottom: 6px;
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      color: #94A3B8;
+      margin-bottom: 24px;
+    }
+
+    .yard-card {
+      background: #0F172A;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .yard-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #F8FAFC;
+      margin-bottom: 4px;
+    }
+
+    .yard-desc {
+      font-size: 12px;
+      color: #64748B;
+    }
+
+    .buttons-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .btn-open {
+      width: 100%;
+      min-height: 64px;
+      border-radius: 18px;
+      border: none;
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: #FFFFFF;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 16px;
+      gap: 4px;
+    }
+
+    .btn-open:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(16, 185, 129, 0.45);
+    }
+
+    .btn-open:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .btn-open:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      background: #334155;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .btn-gate-subtitle {
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0.85;
+    }
+
+    .status-msg {
+      margin-top: 20px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .status-msg.error {
+      color: #EF4444;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 14px;
+      padding: 14px;
+      font-weight: 500;
+    }
+
+    .status-msg.success {
+      color: #10B981;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 16px;
+      padding: 20px 16px;
+      font-weight: 600;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #FFFFFF;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .footer {
+      margin-top: 24px;
+      font-size: 11px;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="brand-badge">⚡ Smart Access</div>
+    <h1 class="brand-title">BUILD MANAGE</h1>
+    <p class="brand-subtitle">Հյուրի Մեկանգամյա Մուտք</p>
+
+    <div class="yard-card">
+      <div id="yardTitle" class="yard-name">Ստուգվում է հղումը...</div>
+      <div id="yardDesc" class="yard-desc">Խնդրում ենք սպասել</div>
+    </div>
+
+    <div id="buttonsContainer" class="buttons-container">
+      <button id="btnLoading" class="btn-open" disabled>
+        <span class="spinner"></span>
+        <span class="btn-gate-subtitle">Բեռնվում է...</span>
+      </button>
+    </div>
+
+    <div id="statusBox" class="status-msg" style="display: none;"></div>
+
+    <div class="footer">Build Manage Security • SmartBarrier System</div>
+  </div>
+
+  <script>
+    const FIREBASE_BASE_URL = "https://smart-barrier-system-default-rtdb.firebaseio.com/";
+
+    const yardTitle = document.getElementById("yardTitle");
+    const yardDesc = document.getElementById("yardDesc");
+    const buttonsContainer = document.getElementById("buttonsContainer");
+    const statusBox = document.getElementById("statusBox");
+
+    let inviteData = null;
+    let resolvedYardId = null;
+    let deviceList = [];
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+    const yardIdParam = urlParams.get("yardId");
+
+    async function init() {
+      if (!token) {
+        showError("Հղման մեջ բացակայում է հրավերի կոդը (Missing Token):");
+        return;
+      }
+
+      try {
+        let data = null;
+
+        // 1. Fetch invite data from Firebase RTDB (try yard specific first, then global)
+        if (yardIdParam) {
+          try {
+            const yardResp = await fetch(`${FIREBASE_BASE_URL}yards/${yardIdParam}/invitations/${token}.json`);
+            if (yardResp.ok) data = await yardResp.json();
+          } catch (e) {}
+        }
+
+        if (!data) {
+          try {
+            const resp = await fetch(`${FIREBASE_BASE_URL}invitations/${token}.json`);
+            if (resp.ok) data = await resp.json();
+          } catch (e) {}
+        }
+
+        if (!data) {
+          showError("Այս հղումը գոյություն չունի կամ ջնջված է (Invalid Link):");
+          return;
+        }
+
+        inviteData = data;
+        resolvedYardId = inviteData.yardId || inviteData.YardId || yardIdParam;
+
+        // 2. Check expiration (30-minute validity)
+        const expiresAt = inviteData.expiresAt || inviteData.ExpiresAt || 0;
+        const now = Date.now();
+        if (expiresAt > 0 && now > expiresAt) {
+          showError("⏰ Այս հղման գործողության ժամկետը (30 րոպե) լրացել է (Expired):");
+          return;
+        }
+
+        const remainingMin = expiresAt > 0 ? Math.max(1, Math.round((expiresAt - now) / 60000)) : 30;
+
+        // 3. Display Yard details
+        const yardName = inviteData.yardName || inviteData.YardName || "Բակ";
+        yardTitle.innerText = `📍 ${yardName}`;
+        yardDesc.innerText = `⏱️ Ակտիվ է ևս ${remainingMin} րոպե • Կարող եք բացել ըստ անհրաժեշտության`;
+
+        // 5. Resolve Allowed Devices
+        let devIds = inviteData.allowedDevices || inviteData.AllowedDevices || [];
+        if (typeof devIds === "string") {
+          devIds = devIds.split(/[\s,;]+/).filter(Boolean);
+        }
+
+        // If no devices in token, lookup yard devices in Firebase
+        if (!devIds || devIds.length === 0) {
+          if (resolvedYardId) {
+            try {
+              const yDevResp = await fetch(`${FIREBASE_BASE_URL}yards/${resolvedYardId}/devices.json`);
+              if (yDevResp.ok) {
+                const devsObj = await yDevResp.json();
+                if (devsObj) devIds = Object.keys(devsObj);
+              }
+            } catch (e) {}
+          }
+        }
+
+        if (!devIds || devIds.length === 0) {
+          showError("Այս բակի համար սարքեր չեն գտնվել:");
+          return;
+        }
+
+        // 6. Fetch detailed info for each device to show human-readable names
+        buttonsContainer.innerHTML = "";
+        deviceList = [];
+
+        for (const id of devIds) {
+          try {
+            const dResp = await fetch(`${FIREBASE_BASE_URL}devices/${id}.json`);
+            if (dResp.ok) {
+              const dInfo = await dResp.json();
+              if (dInfo && !dInfo.isDeleted) {
+                deviceList.push({
+                  id: id,
+                  name: dInfo.name || id,
+                  relayIndex: dInfo.relayIndex || 1
+                });
+                continue;
+              }
+            }
+          } catch (e) {}
+          deviceList.push({ id: id, name: id, relayIndex: 1 });
+        }
+
+        if (deviceList.length === 0) {
+          showError("Հասանելի սարքեր չկան:");
+          return;
+        }
+
+        // Render Action Buttons
+        deviceList.forEach(dev => {
+          const btn = document.createElement("button");
+          btn.className = "btn-open";
+          
+          let titleText = "🟢 ԲԱՑԵԼ ՇԼԱԳԲԱՈՒՄԸ";
+          if (deviceList.length > 1) {
+            titleText = `🟢 ԲԱՑԵԼ • ${dev.name}`;
+          } else if (dev.name && dev.name !== dev.id) {
+            titleText = `🟢 ԲԱՑԵԼ (${dev.name})`;
+          }
+
+          btn.innerHTML = `<span>${titleText}</span><span class="btn-gate-subtitle">ID: ${dev.id}</span>`;
+          btn.addEventListener("click", () => onTriggerDevice(dev, btn));
+          buttonsContainer.appendChild(btn);
+        });
+
+      } catch (err) {
+        showError(`Կապի սխալ: ${err.message}`);
+      }
+    }
+
+    async function onTriggerDevice(dev, clickedBtn) {
+      // Disable all buttons during execution
+      const allBtns = buttonsContainer.querySelectorAll("button");
+      allBtns.forEach(b => b.disabled = true);
+
+      clickedBtn.innerHTML = '<span class="spinner"></span> <span>Ուղարկվում է հրահանգ...</span>';
+
+      try {
+        const trigger = {
+          triggerId: "gst_" + Math.random().toString(36).substring(2, 10),
+          timestamp: Date.now(),
+          requestedByName: "Հյուր (Guest Web)",
+          state: "PENDING",
+          mode: "AUTO",
+          durationSeconds: 3
+        };
+
+        // 1. Send trigger to device in Firebase RTDB
+        const triggerResp = await fetch(`${FIREBASE_BASE_URL}devices/${dev.id}/relayTrigger.json`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(trigger)
+        });
+
+        if (!triggerResp.ok) {
+          throw new Error(`Չհաջողվեց հրահանգ ուղարկել սարքին (HTTP ${triggerResp.status})`);
+        }
+
+        clickedBtn.innerHTML = '<span class="spinner"></span> <span>Շլագբաումը բացվում է...</span>';
+
+        // 2. Poll up to 4 seconds to verify hardware acknowledgment
+        for (let i = 0; i < 8; i++) {
+          await new Promise(r => setTimeout(r, 500));
+          try {
+            const stResp = await fetch(`${FIREBASE_BASE_URL}devices/${dev.id}/relayTrigger/state.json`);
+            if (stResp.ok) {
+              const state = await stResp.json();
+              if (state === "PROCESSED") {
+                break; // Hardware confirmed!
+              }
+            }
+          } catch (e) {}
+        }
+
+        // 3. Record usage event in Firebase without locking the guest out
+        const patchData = JSON.stringify({
+          lastUsedAt: Date.now(),
+          lastUsedDevice: dev.id
+        });
+
+        try {
+          await fetch(`${FIREBASE_BASE_URL}invitations/${token}.json`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: patchData
+          });
+        } catch (e) {}
+
+        if (resolvedYardId) {
+          try {
+            await fetch(`${FIREBASE_BASE_URL}yards/${resolvedYardId}/invitations/${token}.json`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: patchData
+            });
+          } catch (e) {}
+        }
+
+        // 4. Success State with 5-second cooldown
+        statusBox.className = "status-msg success";
+        statusBox.innerHTML = `✅ Շլագբաումը բացվեց!<br><span style="font-size:13px; font-weight:500; color:#E2E8F0; display:block; margin-top:6px;">«${dev.name}» բացված է: Պատնեշը կփակվի ավտոմատ:</span>`;
+        statusBox.style.display = "block";
+
+        for (let sec = 5; sec >= 1; sec--) {
+          clickedBtn.innerHTML = `<span>⏳ ԲԱՑՎԱԾ Է (${sec}վ)</span><span class="btn-gate-subtitle">${dev.name}</span>`;
+          await new Promise(r => setTimeout(r, 1000));
+        }
+
+        // Re-enable so guest can open again anytime during their 30 minutes!
+        allBtns.forEach(b => b.disabled = false);
+        let titleText = "🟢 ԲԱՑԵԼ ՇԼԱԳԲԱՈՒՄԸ";
+        if (deviceList.length > 1) {
+          titleText = `🟢 ԲԱՑԵԼ • ${dev.name}`;
+        } else if (dev.name && dev.name !== dev.id) {
+          titleText = `🟢 ԲԱՑԵԼ (${dev.name})`;
+        }
+        clickedBtn.innerHTML = `<span>${titleText}</span><span class="btn-gate-subtitle">ID: ${dev.id}</span>`;
+
+      } catch (err) {
+        allBtns.forEach(b => b.disabled = false);
+        clickedBtn.innerHTML = `<span>🟢 ՓՈՐՁԵԼ ԿՐԿԻՆ</span><span class="btn-gate-subtitle">${dev.name}</span>`;
+        showError(`Չհաջողվեց բացել. ${err.message}`);
+      }
+    }
+
+    function showError(msg) {
+      yardTitle.innerText = "❌ Մուտքն արգելված է";
+      yardDesc.innerText = "Հյուրի հղում";
+      buttonsContainer.style.display = "none";
+      statusBox.className = "status-msg error";
+      statusBox.innerText = msg;
+      statusBox.style.display = "block";
+    }
+
+    init();
+  </script>
+</body>
+</html>

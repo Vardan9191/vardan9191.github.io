@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build Manage - Պաշտպանված Ադմին Վահանակ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0B0F19;
+      --bg-surface: #111827;
+      --bg-card: rgba(30, 41, 59, 0.7);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(59, 130, 246, 0.5);
+      --primary: #3B82F6;
+      --primary-hover: #2563EB;
+      --primary-glow: rgba(59, 130, 246, 0.25);
+      --success: #10B981;
+      --success-glow: rgba(16, 185, 129, 0.2);
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --danger-glow: rgba(239, 68, 68, 0.2);
+      --text-main: #F9FAFB;
+      --text-muted: #9CA3AF;
+      --text-dim: #6B7280;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(37, 99, 235, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation */
+    header {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #2563EB, #1D4ED8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60A5FA;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: 8px;
+    }
+
+    .security-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.12);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 10px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    button {
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-refresh {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-refresh:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-settings {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-settings:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-logout {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #F87171;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-logout:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Stats Overview */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .summary-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .summary-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    /* Section Header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Devices Grid */
+    .devices-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+    }
+
+    .device-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .device-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.16);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .device-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--status-color, var(--border));
+    }
+
+    .device-card.is-online {
+      --status-color: var(--success);
+    }
+
+    .device-card.is-offline {
+      --status-color: var(--danger);
+    }
+
+    .device-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .device-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+
+    .device-id {
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--text-dim);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-online {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 12px var(--success-glow);
+    }
+
+    .badge-offline {
+      background: rgba(239, 68, 68, 0.12);
+      color: #F87171;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .badge-online .status-dot {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Telemetry Info List */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .telemetry-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .telemetry-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .telemetry-val {
+      font-size: 12px;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .signal-good { color: #34D399; }
+    .signal-fair { color: #FBBF24; }
+    .signal-weak { color: #F87171; }
+
+    /* Action Buttons */
+    .device-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-reboot {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.25);
+      color: #FBBF24;
+    }
+    .btn-reboot:hover:not(:disabled) {
+      background: rgba(245, 158, 11, 0.22);
+      border-color: #F59E0B;
+    }
+
+    .btn-ota {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: #60A5FA;
+    }
+    .btn-ota:hover:not(:disabled) {
+      background: rgba(59, 130, 246, 0.25);
+      border-color: #3B82F6;
+    }
+
+    .btn-action:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs-wrapper {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .nav-tab {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .nav-tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+
+    /* Technicians UI & Ptichka Switch */
+    .tech-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      transition: border-color 0.2s;
+    }
+    .tech-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .tech-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .tech-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #60A5FA;
+    }
+
+    .tech-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .tech-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tech-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .tech-auth-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    /* Ptichka Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.18);
+      transition: .25s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--success);
+      box-shadow: 0 0 12px var(--success-glow);
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .btn-delete-tech {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #F87171;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-delete-tech:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-box {
+      background: #131B2E;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 28px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      animation: modalSlide 0.2s ease-out;
+    }
+
+    @keyframes modalSlide {
+      from { opacity: 0; transform: translateY(12px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .btn-modal {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-cancel {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+    }
+    .btn-cancel:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-confirm-reboot {
+      background: var(--warning);
+      color: #000;
+    }
+    .btn-confirm-reboot:hover {
+      background: #E58E00;
+    }
+
+    .btn-confirm-ota {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-confirm-ota:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Auth Gate (Login / Setup) */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 50% 30%, rgba(37, 99, 235, 0.15) 0%, transparent 60%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 36px 32px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .login-logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #2563EB, #1D4ED8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 0 30px var(--primary-glow);
+    }
+
+    .login-card h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .login-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+    .login-input:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px var(--primary-glow);
+      margin-top: 4px;
+    }
+    .btn-login:hover {
+      background: var(--primary-hover);
+    }
+
+    .login-error {
+      color: #F87171;
+      font-size: 12px;
+      margin-top: 12px;
+      display: none;
+      background: rgba(239, 68, 68, 0.1);
+      padding: 8px;
+      border-radius: 8px;
+    }
+
+    .security-notice {
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      font-size: 11px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- AUTHENTICATION OVERLAY (100% PURE EMAIL OTP - NO PASSWORDS) -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+      <div class="login-logo">🛡️</div>
+      <h2 id="authTitle">Ադմին Մուտք</h2>
+      <p id="authSubtitle">Մուտքը կատարվում է բացառապես Գլխավոր Ադմինիստրատորի էլ. հասցեին ուղարկվող միանգամյա կոդով (Email OTP):</p>
+
+      <!-- Step 1: Secure Phone Input (Zero leaked credentials) -->
+      <div id="authStepRequest">
+        <div style="margin-bottom: 16px; text-align: left;">
+          <label style="font-size: 12px; font-weight: 700; color: #94A3B8; margin-bottom: 6px; display: block;">
+            Ադմինիստրատորի Հեռախոսահամար:
+          </label>
+          <input type="tel" id="adminPhoneInput" class="login-input" placeholder="+374 XX XXXXXX" autocomplete="tel" style="font-size: 16px; font-weight: 600; letter-spacing: 1px;" onkeyup="if(event.key==='Enter') handleSendAdminOtp()">
+        </div>
+
+        <button id="btnSendAdminOtp" class="btn-login" style="background: linear-gradient(135deg, #2563EB, #1D4ED8); box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);" onclick="handleSendAdminOtp()">
+          📨 ՈՒՂԱՐԿԵԼ ՀԱՍՏԱՏՄԱՆ ԿՈԴ
+        </button>
+      </div>
+
+      <!-- Step 2: Enter 6-digit OTP Code -->
+      <div id="authStepVerify" style="display: none;">
+        <div id="otpSentBanner" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); color: #34D399; padding: 12px; border-radius: 12px; font-size: 13px; margin-bottom: 16px; text-align: left; line-height: 1.5;">
+          ✅ 6-նիշ կոդն ուղարկված է Ձեր գրանցված էլ. փոստին:<br>
+          <span style="font-size: 11px; color: #9CA3AF;">Ստուգեք նամակների արկղը (Inbox կամ Spam):</span>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <input type="text" id="adminOtpInput" class="login-input" placeholder="• • • • • •" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="text-align: center; font-size: 26px; font-weight: 800; letter-spacing: 8px; font-family: monospace; padding: 14px; background: rgba(0,0,0,0.3); border: 2px solid rgba(59, 130, 246, 0.4);" onkeyup="if(event.key==='Enter') handleVerifyAdminOtp()">
+          <div id="otpTimerText" style="font-size: 11px; color: var(--text-dim); margin-top: 6px;">⏳ Կոդը վավեր է 5 րոպե</div>
+        </div>
+
+        <button id="btnVerifyAdminOtp" class="btn-login" style="background: #10B981; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);" onclick="handleVerifyAdminOtp()">
+          🔐 ՀԱՍՏԱՏԵԼ ԵՎ ՄՈՒՏՔ ԳՈՐԾԵԼ
+        </button>
+
+        <div style="margin-top: 14px; display: flex; justify-content: center;">
+          <button id="btnResendOtp" type="button" style="background: none; border: none; color: #60A5FA; font-size: 12px; cursor: pointer; text-decoration: underline;" onclick="handleSendAdminOtp()">
+            ↺ Ուղարկել նոր կոդ
+          </button>
+        </div>
+      </div>
+
+      <div id="authError" class="login-error" style="display: none; margin-top: 16px;"></div>
+
+      <div class="security-notice" style="margin-top: 20px;">
+        <span>🔒</span>
+        <span>Անվտանգություն՝ Միանգամյա Cloud OTP (Passwordless Email Auth)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">⚡</div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span class="brand-title">BUILD MANAGE</span>
+          <span class="brand-badge">ADMIN v2.0</span>
+          <span class="security-badge">🔒 Լոկալ & Փակ</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted);">ESP32 Սարքերի Կառավարման Վահանակ</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-refresh" onclick="fetchDevices()">
+        <span>🔄</span> Թարմացնել
+      </button>
+      <button class="btn-logout" onclick="logout()">Փակել (Lock)</button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main>
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs-wrapper">
+      <button id="tabBtnDevices" class="nav-tab active" onclick="switchAdminTab('devices')">
+        📡 ESP32 Սարքեր (<span id="tabCountDevices">0</span>)
+      </button>
+      <button id="tabBtnTechs" class="nav-tab" onclick="switchAdminTab('techs')">
+        👥 Տեխնիկական Թիմ &amp; Թույլտվություններ (<span id="tabCountTechs">1</span>)
+      </button>
+    </div>
+
+    <!-- SECTION: ESP32 DEVICES -->
+    <div id="sectionDevices">
+      <!-- Summary -->
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span class="summary-label">Ընդհանուր Սարքեր</span>
+          <span id="statTotal" class="summary-value">0</span>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label" style="color: var(--success);">🟢 Ակտիվ (Online)</span>
+          <span id="statOnline" class="summary-value" style="color: var(--success);">0</span>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label" style="color: var(--danger);">🔴 Անհասանելի (Offline)</span>
+          <span id="statOffline" class="summary-value" style="color: var(--danger);">0</span>
+        </div>
+      </div>
+
+      <!-- Filter & Search Controls -->
+      <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+        <div style="flex: 1; min-width: 260px; position: relative;">
+          <input type="text" id="deviceSearchInput" class="form-input" placeholder="🔍 Որոնել ըստ Բակի, Շլագբաումի անվանման, ID-ի կամ IP-ի..." oninput="filterAndRenderDevices()" style="padding-left: 38px; margin: 0;">
+          <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5;">🔍</span>
+        </div>
+        <div style="min-width: 200px;">
+          <select id="yardFilterSelect" class="form-input" onchange="filterAndRenderDevices()" style="margin: 0; cursor: pointer;">
+            <option value="ALL">🏢 Բոլոր Բակերը</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Devices List -->
+      <div class="section-header">
+        <h2 class="section-title">📡 Միացված ESP32 Սարքեր</h2>
+        <span id="lastUpdatedText" style="font-size: 12px; color: var(--text-muted);">Ստուգվում է...</span>
+      </div>
+
+      <div id="devicesContainer" class="devices-grid">
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
+          Բեռնվում են սարքերի տվյալները...
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION: TECHNICIANS & AUTHORIZATIONS -->
+    <div id="sectionTechs" style="display: none;">
+      <!-- Master Admin Overview Card -->
+      <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(30, 41, 59, 0.7)); border: 1.5px solid rgba(245, 158, 11, 0.35); border-radius: 20px; padding: 22px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 52px; height: 52px; border-radius: 16px; background: #F59E0B; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);">👑</div>
+            <div>
+              <div style="font-size: 11px; font-weight: 800; color: #F59E0B; letter-spacing: 0.05em; text-transform: uppercase;">Համակարգի Գլխավոր Ադմինիստրատոր</div>
+              <div style="font-size: 18px; font-weight: 800; color: #fff;">Vardan</div>
+              <div style="font-size: 13px; color: #CBD5E1; margin-top: 2px;">
+                📞 <strong>+374 98 900424</strong> (098 900424) &nbsp;•&nbsp; ✉️ <strong>vardan9191@gmail.com</strong>
+              </div>
+            </div>
+          </div>
+          <div style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34D399; font-size: 12px; font-weight: 800; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #34D399;"></span>
+            ԼԻԱԶՈՐՎԱԾ (Master SuperAdmin)
+          </div>
+        </div>
+      </div>
+
+      <!-- Add New Technician Card -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 22px; margin-bottom: 24px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+          ➕ Ավելացնել Նոր Տեխնիկ
+        </h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 18px;">
+          Տեխնիկը կկարողանա մուտք գործել SmartBarrier Tech հավելված (Android / iOS) իր հեռախոսահամարով և էլ․ հասցեին ստացվող 6-նիշ OTP կոդով միայն այն դեպքում, երբ նշված է թույլտվության «պտիչկան»:
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
+          <div>
+            <label class="form-label" style="margin-bottom: 4px;">Անուն Ազգանուն:</label>
+            <input type="text" id="newTechName" class="form-input" placeholder="օր․՝ Արմեն Ղազարյան" style="margin: 0;">
+          </div>
+          <div>
+            <label class="form-label" style="margin-bottom: 4px;">Հեռախոսահամար:</label>
+            <input type="tel" id="newTechPhone" class="form-input" placeholder="098 123456 կամ +374..." style="margin: 0;">
+          </div>
+          <div>
+            <label class="form-label" style="margin-bottom: 4px;">Էլ․ հասցե (Email for OTP):</label>
+            <input type="email" id="newTechEmail" class="form-input" placeholder="tech@gmail.com" style="margin: 0;">
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding-top: 4px;">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; color: #E2E8F0; font-weight: 600;">
+            <input type="checkbox" id="newTechAuth" checked style="width: 18px; height: 18px; accent-color: var(--success); cursor: pointer;">
+            <span>Տալ մուտքի թույլտվություն միանգամից (Ավտորիզացված / ☑️)</span>
+          </label>
+          <button class="btn-action" style="background: var(--primary); color: #fff; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;" onclick="handleAddTechnician()">
+            ➕ ԱՎԵԼԱՑՆԵԼ ՏԵԽՆԻԿ
+          </button>
+        </div>
+      </div>
+
+      <!-- Technicians List Header -->
+      <div class="section-header" style="margin-bottom: 16px;">
+        <h2 class="section-title">👥 Գրանցված Տեխնիկներ և Թույլտվություններ («Պտիչկա»)</h2>
+        <button class="btn-refresh" onclick="fetchTechnicians()"><span>🔄</span> Թարմացնել Ցանկը</button>
+      </div>
+
+      <!-- Technicians Container -->
+      <div id="techsContainer">
+        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+          Բեռնվում են տեխնիկների տվյալները...
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- REBOOT CONFIRMATION MODAL -->
+  <div id="rebootModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title" style="color: var(--warning);">🔄 Վերագործարկել ESP32-ը</div>
+      <div id="rebootDesc" class="modal-desc">
+        Դուք պատրաստվում եք հեռակա վերագործարկել (Reboot) սարքը:
+      </div>
+      <div class="modal-actions">
+        <button class="btn-modal btn-cancel" onclick="closeModals()">Չեղարկել</button>
+        <button id="btnConfirmReboot" class="btn-modal btn-confirm-reboot">ԱՅՈ, ՎԵՐԱԳՈՐԾԱՐԿԵԼ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTA UPDATE MODAL -->
+  <div id="otaModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title" style="color: var(--primary);">🚀 Ծրագրի Հեռակա Թարմացում (OTA)</div>
+      <div class="modal-desc">
+        Նշեք նոր ծրագրի տարբերակը և կոմպիլացված <code style="color:var(--primary);">.bin</code> ֆայլի հղումը (URL):
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ՆՈՐ ՏԱՐԲԵՐԱԿ (Version):</label>
+        <input type="text" id="otaTargetVersion" class="form-input" placeholder="Օրինակ՝ 2.0.1" value="2.0.1">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">FIRMWARE (.BIN) URL ՀԱՍՑԵ:</label>
+        <input type="text" id="otaFirmwareUrl" class="form-input" placeholder="https://raw.githubusercontent.com/.../firmware.bin">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-modal btn-cancel" onclick="closeModals()">Չեղարկել</button>
+        <button id="btnConfirmOta" class="btn-modal btn-confirm-ota">ՍԿՍԵԼ ԹԱՐՄԱՑՈՒՄԸ</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const FIREBASE_BASE_URL = "https://smart-barrier-system-default-rtdb.firebaseio.com/";
+    const ONLINE_TIMEOUT_MS = 75000; // 75 seconds resilient threshold
+
+    const MASTER_ADMIN_PHONE = "+37498900424";
+    const MASTER_ADMIN_EMAIL = "vardan9191@gmail.com";
+    const SESSION_KEY_AUTH = "sb_admin_session_unlocked";
+
+    let activeDeviceId = null;
+    let autoRefreshTimer = null;
+    let resendCountdownTimer = null;
+    let lastActivityTime = Date.now();
+
+    // Initialize Auth state (Pure Email OTP - No Passwords, Zero exposed credentials)
+    async function initAuth() {
+      const isUnlocked = sessionStorage.getItem(SESSION_KEY_AUTH) === "true";
+
+      if (isUnlocked) {
+        document.getElementById("loginOverlay").style.display = "none";
+        startDashboard();
+        initInactivityWatchdog();
+        return;
+      }
+
+      document.getElementById("loginOverlay").style.display = "flex";
+      document.getElementById("authStepRequest").style.display = "block";
+      document.getElementById("authStepVerify").style.display = "none";
+
+      const savedPhone = localStorage.getItem("sb_admin_phone") || "";
+      const phoneInput = document.getElementById("adminPhoneInput");
+      if (phoneInput) {
+        if (savedPhone) phoneInput.value = savedPhone;
+        phoneInput.focus();
+      }
+
+      initInactivityWatchdog();
+    }
+
+    // Helper: Normalize Armenian & International phone numbers
+    function normalizePhone(raw) {
+      if (!raw) return "";
+      const digits = raw.replace(/\D/g, "");
+      if (digits.startsWith("374")) return "+" + digits;
+      if (digits.startsWith("0")) return "+374" + digits.substring(1);
+      if (digits.length === 8) return "+374" + digits;
+      return "+" + digits;
+    }
+
+    // Helper: Mask email for privacy
+    function maskEmail(email) {
+      if (!email || !email.includes("@")) return email;
+      const parts = email.split("@");
+      const name = parts[0];
+      const domain = parts[1];
+      if (name.length <= 2) return `${name[0]}*@${domain}`;
+      return `${name[0]}***${name[name.length - 1]}@${domain}`;
+    }
+
+    // Send 6-digit OTP code to registered admin email
+    async function handleSendAdminOtp() {
+      const errBox = document.getElementById("authError");
+      errBox.style.display = "none";
+      const btn = document.getElementById("btnSendAdminOtp");
+      const resendBtn = document.getElementById("btnResendOtp");
+      const phoneInput = document.getElementById("adminPhoneInput");
+      const rawPhone = phoneInput ? phoneInput.value.trim() : "";
+
+      const normPhone = normalizePhone(rawPhone);
+      if (!normPhone || normPhone.length < 11) {
+        showAuthError("Խնդրում ենք մուտքագրել վավեր հեռախոսահամար (+374 XX XXXXXX):");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "⏳ ՈՒՂԱՐԿՎՈՒՄ Է...";
+      if (resendBtn) {
+        resendBtn.disabled = true;
+        resendBtn.innerText = "⏳ Ուղարկվում է...";
+      }
+
+      try {
+        // Verify authorization against Master Admin
+        if (normPhone !== MASTER_ADMIN_PHONE) {
+          showAuthError("Այս հեռախոսահամարը չունի Գլխավոր Ադմինիստրատորի մուտքի թույլտվություն:");
+          btn.disabled = false;
+          btn.innerText = "📨 ՈՒՂԱՐԿԵԼ ՀԱՍՏԱՏՄԱՆ ԿՈԴ";
+          if (resendBtn) {
+            resendBtn.disabled = false;
+            resendBtn.innerText = "↺ Ուղարկել նոր կոդ";
+          }
+          return;
+        }
+
+        localStorage.setItem("sb_admin_phone", rawPhone);
+
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const cleanKey = encodeURIComponent(normPhone);
+        const now = Date.now();
+        const expiresAt = now + (5 * 60 * 1000); // 5 minutes validity
+
+        const otpData = {
+          code: otpCode,
+          phone: normPhone,
+          email: MASTER_ADMIN_EMAIL,
+          createdAt: now,
+          expiresAt: expiresAt,
+          used: false
+        };
+
+        // 1. Write OTP record to Firebase RTDB provisioning/auth_otps
+        await fetch(`${FIREBASE_BASE_URL}provisioning/auth_otps/${cleanKey}.json`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(otpData)
+        });
+
+        const emailPayload = {
+          to: MASTER_ADMIN_EMAIL,
+          phone: normPhone,
+          code: otpCode,
+          subject: `🔐 ${otpCode} • Smart Barrier Ադմին Մուտքի Կոդ`,
+          timestamp: now
+        };
+
+        // 2. Dispatch to local email daemon on 127.0.0.1:3099 for instant delivery
+        let dispatched = false;
+        try {
+          const localResp = await fetch("http://127.0.0.1:3099/send-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(emailPayload)
+          });
+          if (localResp.ok) {
+            dispatched = true;
+          }
+        } catch (e) {
+          // Local daemon not reachable via HTTP
+        }
+
+        // 3. Backup: write to Firebase provisioning/outgoing_emails for background daemon pickup
+        if (!dispatched) {
+          await fetch(`${FIREBASE_BASE_URL}provisioning/outgoing_emails.json`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(emailPayload)
+          }).catch(() => {});
+        }
+
+        // Switch to OTP entry step
+        document.getElementById("authStepRequest").style.display = "none";
+        document.getElementById("authStepVerify").style.display = "block";
+        const masked = maskEmail(MASTER_ADMIN_EMAIL);
+        const banner = document.getElementById("otpSentBanner");
+        if (banner) {
+          banner.innerHTML = `✅ 6-նիշ կոդն ուղարկված է <strong>${masked}</strong> հասցեին:<br><span style="font-size: 11px; color: #9CA3AF;">Ստուգեք նամակների արկղը (Inbox կամ Spam):</span>`;
+        }
+        const otpInput = document.getElementById("adminOtpInput");
+        otpInput.value = "";
+        otpInput.focus();
+
+        // 30 seconds cooldown for resend button
+        let remaining = 30;
+        if (resendCountdownTimer) clearInterval(resendCountdownTimer);
+        if (resendBtn) {
+          resendCountdownTimer = setInterval(() => {
+            remaining--;
+            if (remaining > 0) {
+              resendBtn.innerText = `↺ Ուղարկել նոր կոդ (${remaining}վ)`;
+            } else {
+              clearInterval(resendCountdownTimer);
+              resendBtn.disabled = false;
+              resendBtn.innerText = "↺ Ուղարկել նոր կոդ";
+            }
+          }, 1000);
+        }
+      } catch (err) {
+        showAuthError("Սխալ կոդն ուղարկելիս: Ստուգեք ինտերնետ կապը: " + err.message);
+        btn.disabled = false;
+        btn.innerText = "📨 ՈՒՂԱՐԿԵԼ ՀԱՍՏԱՏՄԱՆ ԿՈԴ";
+        if (resendBtn) {
+          resendBtn.disabled = false;
+          resendBtn.innerText = "↺ Ուղարկել նոր կոդ";
+        }
+      }
+    }
+
+    // Verify 6-digit OTP code against Firebase Cloud Vault
+    async function handleVerifyAdminOtp() {
+      const errBox = document.getElementById("authError");
+      errBox.style.display = "none";
+      const code = document.getElementById("adminOtpInput").value.trim();
+
+      if (code.length !== 6 || !/^\d{6}$/.test(code)) {
+        showAuthError("Խնդրում ենք մուտքագրել ճիշտ 6-նիշ թվային կոդը:");
+        return;
+      }
+
+      const verifyBtn = document.getElementById("btnVerifyAdminOtp");
+      verifyBtn.disabled = true;
+      verifyBtn.innerText = "⏳ ՍՏՈՒԳՎՈՒՄ Է...";
+
+      try {
+        const rawPhone = document.getElementById("adminPhoneInput")?.value.trim() || "";
+        const normPhone = normalizePhone(rawPhone) || MASTER_ADMIN_PHONE;
+        const cleanKey = encodeURIComponent(normPhone);
+        const resp = await fetch(`${FIREBASE_BASE_URL}provisioning/auth_otps/${cleanKey}.json`);
+        if (!resp.ok) {
+          showAuthError("Սերվերի սխալ կոդը ստուգելիս:");
+          verifyBtn.disabled = false;
+          verifyBtn.innerText = "🔐 ՀԱՍՏԱՏԵԼ ԵՎ ՄՈՒՏՔ ԳՈՐԾԵԼ";
+          return;
+        }
+
+        const data = await resp.json();
+        const now = Date.now();
+
+        if (data && data.code === code) {
+          if (data.expiresAt && now > data.expiresAt) {
+            showAuthError("Կոդի վավերականության ժամկետն ավարտվել է (5 րոպե): Խնդրում ենք ուղարկել նոր կոդ:");
+            verifyBtn.disabled = false;
+            verifyBtn.innerText = "🔐 ՀԱՍՏԱՏԵԼ ԵՎ ՄՈՒՏՔ ԳՈՐԾԵԼ";
+            return;
+          }
+
+          // Single-use guarantee: Invalidate OTP immediately from Firebase
+          fetch(`${FIREBASE_BASE_URL}provisioning/auth_otps/${cleanKey}.json`, { method: "DELETE" }).catch(() => {});
+
+          sessionStorage.setItem(SESSION_KEY_AUTH, "true");
+          document.getElementById("loginOverlay").style.display = "none";
+          startDashboard();
+        } else {
+          showAuthError("Սխալ կոդ: Խնդրում ենք ստուգել Ձեր էլ. փոստին եկած նամակը:");
+          verifyBtn.disabled = false;
+          verifyBtn.innerText = "🔐 ՀԱՍՏԱՏԵԼ ԵՎ ՄՈՒՏՔ ԳՈՐԾԵԼ";
+        }
+      } catch (err) {
+        showAuthError("Սխալ ստուգման ժամանակ: " + err.message);
+        verifyBtn.disabled = false;
+        verifyBtn.innerText = "🔐 ՀԱՍՏԱՏԵԼ ԵՎ ՄՈՒՏՔ ԳՈՐԾԵԼ";
+      }
+    }
+
+    function showAuthError(msg) {
+      const errBox = document.getElementById("authError");
+      errBox.innerText = msg;
+      errBox.style.color = "#F87171";
+      errBox.style.background = "rgba(239, 68, 68, 0.1)";
+      errBox.style.border = "1px solid rgba(239, 68, 68, 0.25)";
+      errBox.style.padding = "10px";
+      errBox.style.borderRadius = "8px";
+      errBox.style.display = "block";
+    }
+
+    function initInactivityWatchdog() {
+      const resetActivity = () => { lastActivityTime = Date.now(); };
+      ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => {
+        window.addEventListener(evt, resetActivity, { passive: true });
+      });
+
+      // 30 minutes inactivity auto-lock
+      setInterval(() => {
+        if (sessionStorage.getItem(SESSION_KEY_AUTH) === "true") {
+          if (Date.now() - lastActivityTime > 30 * 60 * 1000) {
+            logout();
+          }
+        }
+      }, 10000);
+    }
+
+    function logout() {
+      sessionStorage.removeItem(SESSION_KEY_AUTH);
+      if (autoRefreshTimer) {
+        clearInterval(autoRefreshTimer);
+        autoRefreshTimer = null;
+      }
+      location.reload();
+    }
+
+    // Dashboard Engine
+    // Dashboard Engine & Yard Intelligence
+    let cachedDevices = {};
+    let cachedYards = {};
+
+    let cachedTechs = {};
+
+    function switchAdminTab(tab) {
+      if (tab === 'devices') {
+        document.getElementById('sectionDevices').style.display = 'block';
+        document.getElementById('sectionTechs').style.display = 'none';
+        document.getElementById('tabBtnDevices').classList.add('active');
+        document.getElementById('tabBtnTechs').classList.remove('active');
+      } else {
+        document.getElementById('sectionDevices').style.display = 'none';
+        document.getElementById('sectionTechs').style.display = 'block';
+        document.getElementById('tabBtnDevices').classList.remove('active');
+        document.getElementById('tabBtnTechs').classList.add('active');
+        fetchTechnicians();
+      }
+    }
+
+    function normalizeArmPhone(raw) {
+      if (!raw) return "";
+      let cleaned = raw.replace(/[^\d+]/g, "");
+      if (cleaned.startsWith("0")) {
+        cleaned = "+374" + cleaned.substring(1);
+      } else if (cleaned.startsWith("374")) {
+        cleaned = "+" + cleaned;
+      } else if (!cleaned.startsWith("+")) {
+        cleaned = "+374" + cleaned;
+      }
+      return cleaned;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function startDashboard() {
+      fetchDevices();
+      fetchTechnicians();
+      if (!autoRefreshTimer) {
+        autoRefreshTimer = setInterval(fetchDevices, 4000);
+      }
+    }
+
+    async function fetchTechnicians() {
+      try {
+        const resp = await fetch(`${FIREBASE_BASE_URL}provisioning/technicians.json`);
+        cachedTechs = (resp.ok ? await resp.json() : {}) || {};
+
+        // Guarantee master admin is always present and cleanly named
+        let hasMaster = false;
+        for (let k in cachedTechs) {
+          if (normalizeArmPhone(cachedTechs[k].phone || k) === MASTER_ADMIN_PHONE) {
+            cachedTechs[k].name = "Vardan (Գլխավոր)";
+            cachedTechs[k].isMaster = true;
+            cachedTechs[k].isAuthorized = true;
+            cachedTechs[k].email = MASTER_ADMIN_EMAIL;
+            hasMaster = true;
+          }
+        }
+
+        if (!hasMaster) {
+          cachedTechs[MASTER_ADMIN_PHONE] = {
+            name: "Vardan (Գլխավոր)",
+            phone: MASTER_ADMIN_PHONE,
+            email: MASTER_ADMIN_EMAIL,
+            isAuthorized: true,
+            isMaster: true,
+            role: "superadmin"
+          };
+        }
+
+        renderTechnicians();
+      } catch (err) {
+        console.error("Techs fetch error:", err);
+      }
+    }
+
+    function renderTechnicians() {
+      const container = document.getElementById("techsContainer");
+      if (!container) return;
+      const techList = Object.values(cachedTechs);
+
+      if (techList.length === 0) {
+        container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">Գրանցված տեխնիկներ չկան:</div>`;
+        return;
+      }
+
+      techList.sort((a, b) => {
+        if (a.isMaster) return -1;
+        if (b.isMaster) return 1;
+        return (a.name || "").localeCompare(b.name || "");
+      });
+
+      let html = "";
+      techList.forEach(tech => {
+        const isMaster = !!tech.isMaster || normalizeArmPhone(tech.phone) === MASTER_ADMIN_PHONE;
+        const isAuth = isMaster ? true : (tech.isAuthorized === true);
+        const phone = tech.phone || "";
+        const name = tech.name || "Տեխնիկ";
+        const email = tech.email || "—";
+
+        html += `
+          <div class="tech-card" style="${isMaster ? 'border-color: rgba(245, 158, 11, 0.4); background: rgba(30, 41, 59, 0.85);' : ''}">
+            <div class="tech-info">
+              <div class="tech-avatar" style="${isMaster ? 'background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.4); color: #F59E0B;' : ''}">
+                ${isMaster ? '👑' : '🔧'}
+              </div>
+              <div class="tech-details">
+                <div class="tech-name">
+                  <span>${escapeHtml(name)}</span>
+                  ${isMaster ? '<span style="background: rgba(245, 158, 11, 0.2); color: #FBBF24; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px; border: 1px solid rgba(245, 158, 11, 0.3);">ԳԼԽԱՎՈՐ</span>' : ''}
+                </div>
+                <div class="tech-meta">
+                  <span>📞 <strong>${escapeHtml(phone)}</strong></span>
+                  <span>✉️ ${escapeHtml(email)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div class="tech-auth-box">
+                <span style="font-size: 12px; font-weight: 600; color: ${isAuth ? 'var(--success)' : 'var(--text-muted)'};">
+                  ${isAuth ? '🟢 Ավտորիզացված' : '⬜ Սպասում է'}
+                </span>
+                ${isMaster 
+                  ? `<span style="font-size: 11px; color: #F59E0B; font-weight: 700; padding: 4px 8px; background: rgba(245, 158, 11, 0.15); border-radius: 8px;">Միշտ Ակտիվ</span>`
+                  : `<label class="switch" title="Մուտքի թույլտվություն («Պտիչկա»)">
+                      <input type="checkbox" ${isAuth ? 'checked' : ''} onchange="toggleTechAuth('${phone}', this.checked)">
+                      <span class="slider"></span>
+                     </label>`
+                }
+              </div>
+
+              ${!isMaster ? `
+                <button class="btn-delete-tech" onclick="deleteTechnician('${phone}')" title="Ջնջել տեխնիկին">
+                  🗑️ Ջնջել
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      document.getElementById("tabCountTechs").innerText = techList.length;
+    }
+
+    async function toggleTechAuth(phone, isAuth) {
+      const cleanKey = encodeURIComponent(phone);
+      try {
+        const resp = await fetch(`${FIREBASE_BASE_URL}provisioning/technicians/${cleanKey}.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isAuthorized: isAuth })
+        });
+        if (resp.ok) {
+          if (cachedTechs[phone]) cachedTechs[phone].isAuthorized = isAuth;
+          renderTechnicians();
+        } else {
+          alert("Չհաջողվեց թարմացնել թույլտվությունը:");
+        }
+      } catch (err) {
+        alert("Սխալ: " + err.message);
+      }
+    }
+
+    async function handleAddTechnician() {
+      const name = document.getElementById("newTechName").value.trim();
+      const rawPhone = document.getElementById("newTechPhone").value.trim();
+      const email = document.getElementById("newTechEmail").value.trim().toLowerCase();
+      const isAuth = document.getElementById("newTechAuth").checked;
+
+      const normPhone = normalizeArmPhone(rawPhone);
+      if (normPhone.length < 10) {
+        alert("Մուտքագրեք ճիշտ հեռախոսահամար (+374...)");
+        return;
+      }
+      if (!email.includes("@")) {
+        alert("Մուտքագրեք վավեր էլ. հասցե (OTP մուտքի համար):");
+        return;
+      }
+
+      const techObj = {
+        name: name || "Տեխնիկ",
+        phone: normPhone,
+        email: email,
+        isAuthorized: isAuth,
+        isMaster: normPhone === MASTER_ADMIN_PHONE,
+        role: normPhone === MASTER_ADMIN_PHONE ? "superadmin" : "technician",
+        createdAt: Date.now()
+      };
+
+      const cleanKey = encodeURIComponent(normPhone);
+      try {
+        const resp = await fetch(`${FIREBASE_BASE_URL}provisioning/technicians/${cleanKey}.json`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(techObj)
+        });
+        if (resp.ok) {
+          document.getElementById("newTechName").value = "";
+          document.getElementById("newTechPhone").value = "";
+          document.getElementById("newTechEmail").value = "";
+          document.getElementById("newTechAuth").checked = true;
+          alert(`«${techObj.name}» (${techObj.phone}) տեխնիկը հաջողությամբ ավելացվեց:`);
+          await fetchTechnicians();
+        } else {
+          alert("Սխալ՝ տեխնիկին պահպանել չհաջողվեց:");
+        }
+      } catch (err) {
+        alert("Սխալ: " + err.message);
+      }
+    }
+
+    async function deleteTechnician(phone) {
+      if (normalizeArmPhone(phone) === MASTER_ADMIN_PHONE) {
+        alert("Գլխավոր ադմինիստրատորին հնարավոր չէ ջնջել:");
+        return;
+      }
+      if (!confirm(`Իսկապե՞ս ցանկանում եք ջնջել ${phone} տեխնիկին:`)) return;
+      const cleanKey = encodeURIComponent(phone);
+      try {
+        await fetch(`${FIREBASE_BASE_URL}provisioning/technicians/${cleanKey}.json`, {
+          method: "DELETE"
+        });
+        await fetchTechnicians();
+      } catch (err) {
+        alert("Ջնջման սխալ: " + err.message);
+      }
+    }
+
+    async function fetchDevices() {
+      try {
+        const [devResp, yardsResp] = await Promise.all([
+          fetch(`${FIREBASE_BASE_URL}devices.json`),
+          fetch(`${FIREBASE_BASE_URL}yards.json`)
+        ]);
+
+        if (!devResp.ok) throw new Error(`Devices HTTP ${devResp.status}`);
+        cachedDevices = (await devResp.json()) || {};
+        cachedYards = (yardsResp.ok ? await yardsResp.json() : {}) || {};
+
+        updateYardFilterOptions();
+        filterAndRenderDevices();
+        document.getElementById("lastUpdatedText").innerText = `Թարմացված է: ${new Date().toLocaleTimeString()}`;
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }
+    }
+
+    function updateYardFilterOptions() {
+      const select = document.getElementById("yardFilterSelect");
+      const currentVal = select.value;
+      const yardIds = Object.keys(cachedYards);
+
+      // Collect yards assigned to devices even if missing in yards collection
+      Object.values(cachedDevices).forEach(dev => {
+        if (dev && dev.yardId && !yardIds.includes(dev.yardId)) {
+          yardIds.push(dev.yardId);
+        }
+      });
+
+      // Keep "ALL" option
+      let html = `<option value="ALL">🏢 Բոլոր Բակերը (${Object.keys(cachedDevices).length} սարք)</option>`;
+      yardIds.forEach(yId => {
+        const y = cachedYards[yId] || {};
+        const yName = y.Name || y.name || yId;
+        const devCount = Object.values(cachedDevices).filter(d => d && d.yardId === yId).length;
+        html += `<option value="${yId}">${yName} (${devCount} սարք)</option>`;
+      });
+
+      select.innerHTML = html;
+      if (currentVal && Array.from(select.options).some(o => o.value === currentVal)) {
+        select.value = currentVal;
+      }
+    }
+
+    function filterAndRenderDevices() {
+      const searchInput = (document.getElementById("deviceSearchInput")?.value || "").toLowerCase().trim();
+      const yardFilter = document.getElementById("yardFilterSelect")?.value || "ALL";
+
+      const filteredObj = {};
+      Object.keys(cachedDevices).forEach(devId => {
+        const dev = cachedDevices[devId];
+        if (!dev) return;
+
+        // Yard Filter
+        if (yardFilter !== "ALL" && dev.yardId !== yardFilter) {
+          return;
+        }
+
+        // Search Filter (checks devId, name, yardName, ipAddress, adminPhone)
+        if (searchInput) {
+          const yard = cachedYards[dev.yardId] || {};
+          const yardName = (yard.Name || yard.name || "").toLowerCase();
+          const devName = (dev.name || "").toLowerCase();
+          const devIp = (dev.ipAddress || dev.ip || "").toLowerCase();
+          const adminPhone = (yard.AdminPhone || "").toLowerCase();
+          const adminName = (yard.AdminName || "").toLowerCase();
+
+          const matches = devId.toLowerCase().includes(searchInput) ||
+                          devName.includes(searchInput) ||
+                          yardName.includes(searchInput) ||
+                          devIp.includes(searchInput) ||
+                          adminPhone.includes(searchInput) ||
+                          adminName.includes(searchInput);
+
+          if (!matches) return;
+        }
+
+        filteredObj[devId] = dev;
+      });
+
+      renderDevices(filteredObj, cachedYards);
+    }
+
+    function renderDevices(devicesObj, yardsObj = {}) {
+      const container = document.getElementById("devicesContainer");
+      const ids = Object.keys(devicesObj);
+
+      if (ids.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted); background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border);">
+            🔍 Ոչ մի սարք չի գտնվել տրված որոնմամբ:
+          </div>`;
+        return;
+      }
+
+      let totalCount = 0;
+      let onlineCount = 0;
+      let offlineCount = 0;
+
+      container.innerHTML = "";
+      const now = Date.now();
+
+      ids.forEach(devId => {
+        const dev = devicesObj[devId];
+        totalCount++;
+
+        // Online check
+        const lastHb = dev.lastHeartbeat || dev.lastHeartbeatAt || 0;
+        const diffMs = now - lastHb;
+        const isOnline = lastHb > 0 && diffMs < ONLINE_TIMEOUT_MS;
+
+        if (isOnline) onlineCount++;
+        else offlineCount++;
+
+        // Yard & Location Intelligence
+        const yard = (dev.yardId && yardsObj[dev.yardId]) ? yardsObj[dev.yardId] : null;
+        const yardName = yard ? (yard.Name || yard.name || "Անհայտ Բակ") : (dev.yardId ? `Բակ: ${dev.yardId}` : "Բակ նշված չէ");
+        const adminName = yard?.AdminName ? yard.AdminName : "—";
+        const adminPhone = yard?.AdminPhone ? yard.AdminPhone : "—";
+        const hasCoords = yard && yard.Latitude && yard.Longitude;
+        const mapsUrl = hasCoords ? `https://www.google.com/maps/search/?api=1&query=${yard.Latitude},${yard.Longitude}` : null;
+
+        // Telemetry details
+        const fwVersion = dev.firmwareVersion || "1.0.0";
+        const ip = dev.ipAddress || dev.ip || "—";
+        const rssi = dev.wifiRssi !== undefined ? dev.wifiRssi : null;
+        const freeHeap = dev.freeHeap ? `${Math.round(dev.freeHeap / 1024)} KB` : "—";
+        const uptimeSec = dev.uptimeSec || 0;
+
+        let uptimeStr = "—";
+        if (uptimeSec > 0) {
+          const hours = Math.floor(uptimeSec / 3600);
+          const mins = Math.floor((uptimeSec % 3600) / 60);
+          uptimeStr = hours > 0 ? `${hours} ժ ${mins} ր` : `${mins} ր`;
+        }
+
+        let signalHtml = `<span class="telemetry-val">—</span>`;
+        if (rssi !== null) {
+          let sigClass = "signal-good";
+          let sigLabel = "Գերազանց";
+          if (rssi < -75) { sigClass = "signal-weak"; sigLabel = "Թույլ"; }
+          else if (rssi < -65) { sigClass = "signal-fair"; sigLabel = "Միջին"; }
+          signalHtml = `<span class="telemetry-val ${sigClass}">${rssi} dBm (${sigLabel})</span>`;
+        }
+
+        const lastSeenText = lastHb > 0 
+          ? `${Math.round(diffMs / 1000)} վրկ առաջ` 
+          : "Երբեք";
+
+        // Card HTML
+        const card = document.createElement("div");
+        card.className = `device-card ${isOnline ? "is-online" : "is-offline"}`;
+        card.innerHTML = `
+          <div class="device-head">
+            <div>
+              <div class="device-name">${dev.name || "Շլագբաում"}</div>
+              <span class="device-id">${devId}</span>
+            </div>
+            <div class="status-badge ${isOnline ? "badge-online" : "badge-offline"}">
+              <span class="status-dot"></span>
+              ${isOnline ? "ONLINE" : "OFFLINE"}
+            </div>
+          </div>
+
+          <!-- YARD / LOCATION INTELLIGENCE -->
+          <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.18); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 5px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; color: #93C5FD; font-size: 13px;">
+                <span>🏢</span> <span>${yardName}</span>
+              </div>
+              ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" style="font-size: 11px; color: #60A5FA; text-decoration: none; background: rgba(59, 130, 246, 0.16); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: 600; display: inline-flex; align-items: center; gap: 3px;">📍 Քարտեզ</a>` : ""}
+            </div>
+            <div style="font-size: 11px; color: var(--text-dim); display: flex; flex-wrap: wrap; gap: 10px;">
+              <span>👤 Պատասխանատու: <strong style="color: var(--text-muted);">${adminName}</strong></span>
+              ${adminPhone !== "—" ? `<span>📞 <a href="tel:${adminPhone}" style="color: #60A5FA; text-decoration: none;">${adminPhone}</a></span>` : ""}
+            </div>
+          </div>
+
+          <div class="telemetry-grid">
+            <div class="telemetry-item">
+              <span class="telemetry-label">Ծրագիր (Firmware):</span>
+              <span class="telemetry-val" style="color: #60A5FA;">v${fwVersion}</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-label">Wi-Fi Ազդանշան:</span>
+              ${signalHtml}
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-label">IP Հասցե:</span>
+              <span class="telemetry-val">${ip}</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-label">Ազատ RAM:</span>
+              <span class="telemetry-val">${freeHeap}</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-label">Աշխատաժամանակ:</span>
+              <span class="telemetry-val">${uptimeStr}</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-label">Վերջին կապ:</span>
+              <span class="telemetry-val">${lastSeenText}</span>
+            </div>
+          </div>
+
+          <div class="device-actions">
+            <button class="btn-action btn-reboot" onclick="promptReboot('${devId}', '${dev.name || devId}')" ${!isOnline ? "disabled" : ""}>
+              <span>🔄</span> Reboot ESP32
+            </button>
+            <button class="btn-action btn-ota" onclick="promptOta('${devId}', '${dev.name || devId}', '${fwVersion}')" ${!isOnline ? "disabled" : ""}>
+              <span>🚀</span> Թարմացնել (OTA)
+            </button>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      // Update summary counters based on all cached devices
+      const allDevs = Object.values(cachedDevices);
+      document.getElementById("statTotal").innerText = allDevs.length;
+      document.getElementById("statOnline").innerText = allDevs.filter(d => {
+        const hb = d.lastHeartbeat || d.lastHeartbeatAt || 0;
+        return hb > 0 && (now - hb) < ONLINE_TIMEOUT_MS;
+      }).length;
+      document.getElementById("statOffline").innerText = allDevs.filter(d => {
+        const hb = d.lastHeartbeat || d.lastHeartbeatAt || 0;
+        return hb <= 0 || (now - hb) >= ONLINE_TIMEOUT_MS;
+      }).length;
+    }
+
+    // Modal Handlers
+    function closeModals() {
+      document.getElementById("rebootModal").style.display = "none";
+      document.getElementById("otaModal").style.display = "none";
+      activeDeviceId = null;
+    }
+
+    function promptReboot(devId, devName) {
+      activeDeviceId = devId;
+      document.getElementById("rebootDesc").innerText = 
+        `Դուք պատրաստվում եք հեռակա վերագործարկել «${devName}» (${devId}) սարքը:`;
+      document.getElementById("rebootModal").style.display = "flex";
+      document.getElementById("btnConfirmReboot").onclick = () => executeReboot(devId);
+    }
+
+    function promptOta(devId, devName, currentVer) {
+      activeDeviceId = devId;
+      const nextVer = bumpVersion(currentVer);
+      document.getElementById("otaTargetVersion").value = nextVer;
+      document.getElementById("otaFirmwareUrl").value = `https://raw.githubusercontent.com/Vardan9191/firmware/v${nextVer}/firmware.bin`;
+      document.getElementById("otaModal").style.display = "flex";
+      document.getElementById("btnConfirmOta").onclick = () => {
+        const ver = document.getElementById("otaTargetVersion").value.trim();
+        const url = document.getElementById("otaFirmwareUrl").value.trim();
+        if (!url || !url.startsWith("http")) {
+          alert("Խնդրում ենք մուտքագրել վավեր HTTP/HTTPS URL հասցե:");
+          return;
+        }
+        executeOtaUpdate(devId, ver, url);
+      };
+    }
+
+    function bumpVersion(ver) {
+      const parts = ver.split(".");
+      if (parts.length === 3) {
+        const patch = parseInt(parts[2], 10) + 1;
+        return `${parts[0]}.${parts[1]}.${patch}`;
+      }
+      return "2.0.1";
+    }
+
+    async function executeReboot(devId) {
+      closeModals();
+      try {
+        const cmd = {
+          command: "REBOOT",
+          state: "PENDING",
+          requestedAt: Date.now()
+        };
+        await fetch(`${FIREBASE_BASE_URL}devices/${devId}/systemCommand.json`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(cmd)
+        });
+        alert(`Վերագործարկման հրամանն ուղարկվեց ${devId}-ին:`);
+        fetchDevices();
+      } catch (err) {
+        alert("Չհաջողվեց ուղարկել հրամանը: " + err.message);
+      }
+    }
+
+    async function executeOtaUpdate(devId, ver, url) {
+      closeModals();
+      try {
+        const cmd = {
+          command: "OTA_UPDATE",
+          targetVersion: ver,
+          firmwareUrl: url,
+          state: "PENDING",
+          requestedAt: Date.now()
+        };
+        await fetch(`${FIREBASE_BASE_URL}devices/${devId}/systemCommand.json`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(cmd)
+        });
+        alert(`Թարմացման հրամանն (v${ver}) ուղարկվեց ${devId}-ին:`);
+        fetchDevices();
+      } catch (err) {
+        alert("Չհաջողվեց ուղարկել թարմացման հրամանը: " + err.message);
+      }
+    }
+
+    // Start
+    initAuth();
+  </script>
+</body>
+</html>
