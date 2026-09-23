@@ -3130,50 +3130,69 @@ ${usersListStr}
 
         const sysCmd = dev.systemCommand || {};
         const state = sysCmd.state || "";
-        const currentVer = dev.firmwareVersion || "";
+        const currentVer = (dev.firmwareVersion || "").trim();
+        const cleanTarget = (targetVer || "").trim();
+        const isVerMatched = (cleanTarget !== "" && currentVer !== "" && (
+          currentVer === cleanTarget ||
+          currentVer.replace(/^v/i, "") === cleanTarget.replace(/^v/i, "")
+        ));
         const elapsedSec = Math.floor((Date.now() - otaMonitorStartTime) / 1000);
-
-        // Check if ESP32 started downloading
-        if (state === "DOWNLOADING") {
-          setOtaStep(2, "active", `ESP32-ը ակտիվ ներբեռնում է .bin ֆայլը (${elapsedSec}վրկ)...`);
-        }
 
         // Check if ESP32 reported error
         if (state === "FAILED") {
           clearInterval(otaMonitorInterval);
           otaMonitorInterval = null;
           setOtaStep(2, "failed", `Սխալ ESP32-ում: ${sysCmd.error || "OTA Update Failed"} (Կոդ: ${sysCmd.code || "?"})`);
+          setOtaStep(3, "failed", "Ֆլեշ գրառումը ընդհատվեց:");
+          setOtaStep(4, "failed", "Թարմացումը չհաստատվեց:");
           showOtaFailureBanner(sysCmd.error || "Ներբեռնումը կամ ֆլեշ գրառումը ձախողվեց");
           return;
         }
 
         // Once state moves to COMPLETED or targetVer matches:
-        if (state === "COMPLETED" || currentVer === targetVer) {
+        if (state === "COMPLETED" || isVerMatched) {
           clearInterval(otaMonitorInterval);
           otaMonitorInterval = null;
+          setOtaStep(1, "completed", "Հրամանն ուղարկված և ստացված է:");
           setOtaStep(2, "completed", "Ֆայլը հաջողությամբ ներբեռնվեց:");
           setOtaStep(3, "completed", "Ծրագիրը գրվեց ֆլեշ հիշողության մեջ և սարքը վերագործարկվեց:");
-          setOtaStep(4, "completed", `Հաստատված է: Սարքի նոր տարբերակը՝ v${currentVer || targetVer}`);
-          showOtaSuccessBanner(otaInitialVersion, currentVer || targetVer);
+          setOtaStep(4, "completed", `Հաստատված է: Սարքի նոր տարբերակը՝ v${currentVer || cleanTarget}`);
+          showOtaSuccessBanner(otaInitialVersion, currentVer || cleanTarget);
           fetchDevices();
           return;
         }
 
-        // Check if download finished and board is flashing / rebooting
-        if (elapsedSec > 15 && state === "DOWNLOADING") {
-          setOtaStep(2, "completed", "Ֆայլը ներբեռնված է:");
-          setOtaStep(3, "active", "Գրառվում է ֆլեշ հիշողության մեջ: Կատարվում է ինքնավերագործարկում...");
+        // Progress indicators during OTA
+        if (state === "DOWNLOADING") {
+          setOtaStep(1, "completed", "Հրամանը հասել է ESP32-ին:");
+          if (elapsedSec < 30) {
+            setOtaStep(2, "active", `ESP32-ը ակտիվ ներբեռնում է .bin ֆայլը (${elapsedSec}վրկ)...`);
+          } else {
+            setOtaStep(2, "completed", "Ֆայլը ներբեռնված է:");
+            setOtaStep(3, "active", `Գրառվում է ֆլեշ հիշողության մեջ (${elapsedSec}վրկ)...`);
+            setOtaStep(4, "active", "Սպասում ենք ESP32-ի առաջին heartbeat-ին նոր վերսիայով...");
+          }
+        } else if (elapsedSec > 25) {
+          setOtaStep(1, "completed", "Հրամանը կատարվել է:");
+          setOtaStep(2, "completed", "Ֆայլի ներբեռնումն ավարտվել է:");
+          setOtaStep(3, "active", `Գրառվում է ֆլեշում և վերագործարկվում է (${elapsedSec}վրկ)...`);
           setOtaStep(4, "active", "Սպասում ենք ESP32-ի առաջին heartbeat-ին նոր վերսիայով...");
         }
 
-        // Timeout guard: 90 seconds
-        if (elapsedSec > 90) {
+        // Resilient Timeout guard: 160 seconds (~2.5 minutes)
+        if (elapsedSec > 160) {
           clearInterval(otaMonitorInterval);
           otaMonitorInterval = null;
-          if (currentVer === targetVer) {
-            showOtaSuccessBanner(otaInitialVersion, targetVer);
+          if (isVerMatched) {
+            setOtaStep(1, "completed", "Հրամանն ուղարկված է:");
+            setOtaStep(2, "completed", "Ֆայլը ներբեռնվել է:");
+            setOtaStep(3, "completed", "Գրառվեց և վերագործարկվեց:");
+            setOtaStep(4, "completed", `Հաստատված է: v${currentVer}`);
+            showOtaSuccessBanner(otaInitialVersion, currentVer);
           } else {
-            showOtaFailureBanner("Ժամանակը լրացավ (Timeout): ESP32-ը 90 վայրկյանում չուղարկեց նոր տարբերակի հաստատումը: Ստուգեք սարքի հոսանքը և Wi-Fi կապը:");
+            setOtaStep(3, "failed", "Ժամանակը լրացավ (Timeout):");
+            setOtaStep(4, "failed", "160 վայրկյանում նոր տարբերակի հաստատում չստացվեց:");
+            showOtaFailureBanner("Ժամանակը լրացավ (160 վայրկյան): ESP32-ը նախատեսված ժամանակում չուղարկեց նոր տարբերակի հաստատումը: Ստուգեք սարքի հոսանքը և Wi-Fi կապը:");
           }
         }
       } catch (err) {
@@ -3559,6 +3578,13 @@ ${usersListStr}
           const state = sysCmd.state || "";
           const curVer = dev.firmwareVersion || "";
 
+          const cleanTarget = (s.targetVer || "").trim();
+          const cleanCur = curVer.trim();
+          const isVerMatched = (cleanTarget !== "" && cleanCur !== "" && (
+            cleanCur === cleanTarget ||
+            cleanCur.replace(/^v/i, "") === cleanTarget.replace(/^v/i, "")
+          ));
+
           if (state === "DOWNLOADING") {
             s.state = "DOWNLOADING";
             s.detail = `ESP32-ը ներբեռնում է .bin ֆայլը (${elapsedSec}վրկ)...`;
@@ -3566,22 +3592,23 @@ ${usersListStr}
             s.state = "FAILED";
             s.failed = true;
             s.detail = sysCmd.error || "Սխալ ESP32-ում";
-          } else if (state === "COMPLETED" || curVer === s.targetVer) {
+          } else if (state === "COMPLETED" || isVerMatched) {
             s.state = "COMPLETED";
             s.completed = true;
-            s.currentVer = curVer || s.targetVer;
-            s.detail = `Հաջողությամբ թարմացվեց v${s.targetVer}`;
-          } else if (elapsedSec > 15 && s.state === "DOWNLOADING") {
-            s.detail = "Գրառվում է ֆլեշում և վերագործարկվում է...";
+            s.currentVer = cleanCur || cleanTarget;
+            s.detail = `Հաջողությամբ թարմացվեց v${cleanTarget}`;
+          } else if (elapsedSec > 25) {
+            s.detail = `Գրառվում է ֆլեշում և վերագործարկվում է (${elapsedSec}վրկ)...`;
           }
 
-          if (elapsedSec > 95 && !s.completed) {
-            if (curVer === s.targetVer) {
+          if (elapsedSec > 160 && !s.completed) {
+            if (isVerMatched) {
               s.completed = true;
-              s.detail = `Հաջողությամբ թարմացվեց v${s.targetVer}`;
+              s.currentVer = cleanCur || cleanTarget;
+              s.detail = `Հաջողությամբ թարմացվեց v${cleanTarget}`;
             } else {
               s.failed = true;
-              s.detail = "Ժամանակը լրացավ (Timeout): Ստուգեք սարքի հոսանքը/կապը:";
+              s.detail = "Ժամանակը լրացավ (160վրկ): Ստուգեք սարքի հոսանքը/կապը:";
             }
           }
         } catch (e) {
