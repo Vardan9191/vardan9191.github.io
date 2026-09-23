@@ -257,6 +257,20 @@
         inviteData = data;
         resolvedYardId = inviteData.yardId || inviteData.YardId || yardIdParam;
 
+        // 1.5 Check if Guest Links are permitted for this yard
+        if (resolvedYardId) {
+          try {
+            const yardCheckResp = await fetch(`${FIREBASE_BASE_URL}yards/${resolvedYardId}.json`);
+            if (yardCheckResp.ok) {
+              const yData = await yardCheckResp.json();
+              if (yData && yData.isGuestLinkEnabled === false) {
+                showError("⛔ Այս բակի համար հյուրի հղումներն անջատված են ադմինիստրատորի կողմից:");
+                return;
+              }
+            }
+          } catch (e) {}
+        }
+
         // 2. Check expiration (30-minute validity)
         const expiresAt = inviteData.expiresAt || inviteData.ExpiresAt || 0;
         const now = Date.now();
